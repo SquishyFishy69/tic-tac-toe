@@ -64,6 +64,7 @@ const displayController = (() => {
 
     const winningDisplay = (player) => {
         displayText.textContent = `${player.getName()} has won! Click restart to play again or reset to choose new opponents!`
+        
         Array.from(cells).forEach((cell) => {
             cell.removeEventListener("click", showSymbol, false);
         });
@@ -71,6 +72,7 @@ const displayController = (() => {
 
     const drawingDisplay = () => {
         displayText.textContent = `It's a draw! Click restart to play again or reset to choose new opponents!`
+        
         Array.from(cells).forEach((cell) => {
             cell.removeEventListener("click", showSymbol, false);
         });
@@ -94,16 +96,19 @@ const displayController = (() => {
     });
 
     const restart = () => {
-        gameBoard.board = ["", "", "", "", "", "", "", "", ""];
-        gameController.setPlayer();
-        changeDisplay();
-        Array.from(cells).forEach((cell) => {
-            cell.textContent = '';
-            cell.addEventListener("click", showSymbol, false);
-        });
+        if (playerO && playerX) {
+            gameBoard.board = ["", "", "", "", "", "", "", "", ""];
+            gameController.setPlayer();
+            changeDisplay();
+
+            Array.from(cells).forEach((cell) => {
+                cell.textContent = '';
+                cell.addEventListener("click", showSymbol, false);
+            });
+        }
     };
 
-    if (playerX && playerO) restartButton.addEventListener("click", restart, false);
+    restartButton.addEventListener("click", restart, false);
 
     const reset = () => {
         location.reload();

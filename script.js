@@ -27,7 +27,7 @@ const gameBoard = (() => {
         }
     };
 
-    return { cells, board, setBoard };
+    return { board, setBoard };
 
 })();
 
@@ -46,8 +46,10 @@ const displayController = (() => {
             let symbol = gameController.returnPlayer().getSymbol();
             e.target.textContent = symbol;
             gameBoard.board[e.target.classList[1]] = symbol;
-            if (gameController.checkWinner()) {
+            if (typeof(gameController.checkWinner()) == 'object') {
                 winningDisplay(gameController.checkWinner());
+            } else if (gameController.checkWinner() == "draw") {
+                drawingDisplay();
             } else {
                 gameController.changePlayer();
                 changeDisplay();
@@ -67,15 +69,22 @@ const displayController = (() => {
         });
     }
 
+    const drawingDisplay = () => {
+        displayText.textContent = `It's a draw! Click restart to play again or reset to choose new opponents!`
+        Array.from(cells).forEach((cell) => {
+            cell.removeEventListener("click", showSymbol, false);
+        });
+    }
+
 
     const chooseName = () => {
         if (p1.value && p2.value) {
             playerX = Player("X", p1.value);
             playerO = Player("O", p2.value);
+            gameController.setPlayer();
+            changeDisplay();
+            document.body.removeChild(enterName);
         }
-        gameController.setPlayer();
-        changeDisplay();
-        document.body.removeChild(enterName);
     };
 
     submit.addEventListener("click", chooseName, false);
@@ -94,7 +103,7 @@ const displayController = (() => {
         });
     };
 
-    restartButton.addEventListener("click", restart, false);
+    if (playerX && playerO) restartButton.addEventListener("click", restart, false);
 
     const reset = () => {
         location.reload();
@@ -102,7 +111,7 @@ const displayController = (() => {
 
     resetButton.addEventListener("click", reset, false);
 
-    return { showSymbol, changeDisplay, restart, reset };
+    return { restart, reset };
 
 })();
 
@@ -136,12 +145,12 @@ const gameController = (() => {
         let playerSymbol = returnPlayer().getSymbol();
 
         for (condition of winConditions) {
-            // console.log(playerSymbol);
-            if (gameBoard.board[condition[0]] == playerSymbol && gameBoard.board[condition[1]] == playerSymbol && gameBoard.board[condition[2]] == playerSymbol) {
-                return player;
-            }
+            if (gameBoard.board[condition[0]] == playerSymbol && gameBoard.board[condition[1]] == playerSymbol && gameBoard.board[condition[2]] == playerSymbol) return player;
         }
-        return false;
+        for (cell of gameBoard.board) {
+            if (cell.length == 0) return false;
+        }
+        return "draw";
     };
 
     return { setPlayer, returnPlayer, changePlayer, checkWinner };
